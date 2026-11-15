@@ -1,7 +1,8 @@
 ---
-import { sections, posts } from '../data/posts';
-const sortedPosts = [...posts].sort((a, b) => b.date.localeCompare(a.date));
-const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${date}T00:00:00`));
+import { getCollection } from 'astro:content';
+import { sections } from '../data/posts';
+const sortedPosts = (await getCollection('posts')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const formatDate = (date: Date) => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Shanghai' }).format(date);
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -20,10 +21,10 @@ const formatDate = (date: string) => new Intl.DateTimeFormat('zh-CN', { year: 'n
     <main id="top">
       <div class="intro"><div class="eyebrow">A LITTLE SPACE OF MINE</div><h1>你好，欢迎来到<br />我的小小世界。</h1><p>画画、日常、科研、代码学习。<br />把走过的路和遇见的风景，慢慢记在这里。</p></div>
       <div class="section-grid">{sections.map(section => {
-        const sectionPosts = sortedPosts.filter(post => post.section === section.id);
+        const sectionPosts = sortedPosts.filter(post => post.data.section === section.id);
         return <section class="section" id={section.id} aria-labelledby={`${section.id}-title`}>
           <div class="cover" style={`background-image:url('${section.cover}')`}><div class="cover-content"><span class="icon">{section.icon}</span><h2 id={`${section.id}-title`}>{section.name}</h2><p>{section.subtitle}</p></div></div>
-          <div class="feed">{sectionPosts.length ? sectionPosts.map(post => <article class="post"><div class="post-head"><span class="avatar" style={`background:${section.color}`}>{section.name[0]}</span><span class="author">我的记录</span><time datetime={post.date}>{formatDate(post.date)}</time></div><p class="post-text">{post.text}</p>{post.images?.length && <div class="post-images">{post.images.map((src, i) => <img src={src} alt={`${section.name}帖子图片 ${i + 1}`} loading="lazy" />)}</div>}{post.tags?.length && <div class="tags">{post.tags.map(tag => <span class="tag"># {tag}</span>)}</div>}</article>) : <p class="empty">这里还没有帖子，等一条新的记录。</p>}</div>
+          <div class="feed">{sectionPosts.length ? sectionPosts.map(post => <article class="post"><div class="post-head"><span class="avatar" style={`background:${section.color}`}>{section.name[0]}</span><span class="author">我的记录</span><time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time></div><p class="post-text">{post.data.text}</p>{post.data.images.length > 0 && <div class="post-images">{post.data.images.map((src, i) => <img src={src} alt={`${section.name}帖子图片 ${i + 1}`} loading="lazy" />)}</div>}{post.data.tags.length > 0 && <div class="tags">{post.data.tags.map(tag => <span class="tag"># {tag}</span>)}</div>}</article>) : <p class="empty">这里还没有帖子，等一条新的记录。</p>}</div>
         </section>;
       })}</div>
     </main><footer class="footer">© {new Date().getFullYear()} 我的记录 · 用 Astro 制作</footer>

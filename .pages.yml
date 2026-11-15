@@ -1,0 +1,68 @@
+media:
+  input: public/uploads
+  output: /uploads
+
+content:
+  - name: posts
+    label: 帖子
+    type: collection
+    path: src/content/posts
+    filename: "{year}-{month}-{day}-{primary}.md"
+    view:
+      fields: [title, section, date]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: 标题（仅在后台列表显示）
+        type: string
+        required: true
+      - name: section
+        label: 发布到
+        type: select
+        required: true
+        options:
+          values:
+            - name: art
+              label: 画画
+            - name: life
+              label: 日常
+            - name: research
+              label: 科研
+            - name: code
+              label: 代码学习
+      - name: date
+        label: 日期
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: text
+        label: 正文
+        type: text
+        required: true
+      - name: images
+        label: 图片
+        type: image
+        options:
+          multiple:
+            max: 9
+          extensions: [jpg, jpeg, png, webp, gif]
+          rename: true
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+
+settings:
+  content:
+    merge: true
+  commit:
+    identity: app
+    templates:
+      create: "发布新帖子：{filename}"
+      update: "更新帖子：{filename}"
+      delete: "删除帖子：{filename}"
